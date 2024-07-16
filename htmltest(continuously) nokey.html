@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #test {
+            text-align: center; /*文本居中对齐*/
+        }
+        #chat {
+            width: 80%;
+            margin: auto;
+        }
+        #div {
+            width: 80%;
+            margin: auto; /* Center the div */
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #f9f9f9;
+        }
+
+        #end {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
+        }
+    </style>
+    <title>Lokkei的私人ChatGPT</title>
+</head>
+<body>
+    <div id="div">
+        <h2 id="test">此浏览器无法使用JavaScript</h2>
+    </div><br>
+    <div id="div">
+        <div id="end"></div>
+    </div>
+    <br>
+    <div id="div">
+        <form method="POST" action="api/login" onsubmit="chatgpt(event)">
+            <label for="key">ChatGPT Key form OpenAI:</label>
+            <input type="text" id="key" name="key">
+            <label for="model">chatGPT Model:</label>
+            <select name="model" id="model">
+            <option value="gpt-3.5-turbo">chatGPT-3.5 Turbo</option>
+            <option value="gpt-4">chatGPT-4</option>
+            <option value="gpt-4o">chatGPT-4o</option>
+            </select>
+            <br>
+            <!-- <label>输入内容： </label> -->
+            <input type="text" id="chat" name="chat">
+            <input type="submit" value="确认">
+            <input type="reset" value="清除">
+        </form>
+    </div>
+    <script>
+        // Get the element by its id
+        var paragraph = document.getElementById("test");
+        // Change the content of the paragraph
+        paragraph.innerHTML = "这是LokKei的测试程序，用于接入ChatGPT API<br>（每次传输都会包含以前的聊天记录，如无必要请刷新以节省金钱）";
+
+        function chat(chat){
+            var chatInput = document.getElementById("chat").value;
+            var end = document.getElementById("end");
+            var endvalue = document.getElementById("end").innerHTML;
+
+            end.innerHTML = endvalue+'<p>'+chat+'</p>';
+        }
+
+        function start(event){
+            var chatInput = document.getElementById("chat").value;
+            var end = document.getElementById("end");
+            var endvalue = document.getElementById("end").innerHTML;
+
+            end.innerHTML = endvalue+'<p><b>'+'User:</b>'+chatInput+'</p>';
+        }
+
+        function chatgpt(event) {
+            // Prevent the default form submission
+            event.preventDefault();
+
+            // Get the input value
+            var endvalue = document.getElementById("end").innerHTML;
+            var chatInput = endvalue+document.getElementById("chat").value;
+            var end = document.getElementById("end");
+            start();
+
+            var apiKey = document.getElementById("key").value;
+            var chatmodle = document.getElementById("model").value;
+            fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: chatmodle,
+                    messages: [{role: 'user', content: chatInput}]
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.choices && data.choices.length > 0) {
+                    //end.innerText = data.choices[0].message.content;
+                    chat('<b>'+chatmodle+':</b>'+data.choices[0].message.content);
+                } else {
+                    // end.innerText = 'No response from ChatGPT.';
+                    chat('No response from ChatGPT.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                //end.innerText = 'Error: ' + error.message;
+                chat('Error: ' + error.message);
+            });
+        }
+    </script>
+</body>
+</html>
